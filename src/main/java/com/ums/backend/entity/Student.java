@@ -10,14 +10,14 @@ import lombok.Data;
 @Table(name = "students")
 public class Student {
     @Id
-    private String reg_id;
+    private String Regid;
 
-    private String firstname;
-    private String lastname;
+    private String firstName;
+    private String lastName;
     private LocalDate dob;
     private String email;
-    private String phonenumber;
+    private String phoneNumber;
     private String address;
     private String department;
-    private String yearadmission;
+    private String yearAdmission;
 }
