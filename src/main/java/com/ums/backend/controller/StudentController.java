@@ -26,11 +26,11 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(studentservice.createStudentDto(student));
     }
     @GetMapping
-    public ResponseEntity<List<Student>> getallStudent(){
+    public ResponseEntity<List<StudentResponseDto>> getallStudent(){
         return ResponseEntity.ok(studentservice.getallstudents());
     }
     @GetMapping("/{regId}")
-    public ResponseEntity<Student> getalldetails(@PathVariable String regId){
+    public ResponseEntity<StudentResponseDto> getalldetails(@PathVariable String regId){
         return ResponseEntity.ok(studentservice.findStudent(regId));
     }
     @PutMapping("/{regId}")

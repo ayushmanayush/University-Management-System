@@ -8,6 +8,7 @@ import com.ums.backend.entity.*;
 import com.ums.backend.repository.*;
 import java.util.*;
 import com.ums.backend.exception.StudentnotFound;
+import com.ums.backend.mapper.StudentCreationMapper;
 import com.ums.backend.dto.*;
 
 @Service
@@ -16,58 +17,48 @@ public class StudentService{
 
   @Autowired
   private Studentrepository studentrepo;
+  @Autowired StudentCreationMapper studentmapper ;
 
-  public StudentResponseDto createStudentDto(StudentRequestDto stud){
-    Student newStudent = new Student();
-    newStudent.setFirstName(stud.getFirstName());
-    newStudent.setLastName(stud.getLastName());
-    newStudent.setAddress(stud.getAddress());
-    newStudent.setPhoneNumber(stud.getPhoneNumber());
-    newStudent.setDepartment(stud.getDepartment());
-    newStudent.setEmail(stud.getEmail());
-    newStudent.setDob(stud.getDob());
-    String reg_year = String.valueOf(LocalDate.now().getYear());
+
+  public synchronized String generateRegId(){
+      String reg_year = String.valueOf(LocalDate.now().getYear());
     int year = (Integer.parseInt(reg_year.substring(2)))*1000;
     int count_student = (int)studentrepo.count();
     year += count_student + 1;
     String reg = "1" + String.valueOf(year);
+    return reg;
+  }
+  public StudentResponseDto createStudentDto(StudentRequestDto stud){
+
+    Student newStudent = studentmapper.toEntity(stud);
+    String reg = generateRegId();
     newStudent.setRegid(reg);
+    String reg_year =String.valueOf( LocalDate.now().getYear());
     newStudent.setYearAdmission(reg_year);
     Student savedStudent =  studentrepo.save(newStudent);
-    StudentResponseDto studResponse = new StudentResponseDto();
-    studResponse.setFirstName(savedStudent.getFirstName());
-    studResponse.setLastName(savedStudent.getLastName());
-    studResponse.setDepartment(savedStudent.getDepartment());
-    studResponse.setRegid(savedStudent.getRegid());
-    studResponse.setYearOfAdmission(savedStudent.getYearAdmission());
-    return studResponse;
+    StudentResponseDto resdto = studentmapper.toResponse(savedStudent);
+    return resdto;
   }
 
 
-  public Student createStudent(Student student){
-    String reg_year = String.valueOf(LocalDate.now().getYear());
-    int year = (Integer.parseInt(reg_year.substring(2)))*1000;
-    int count_student = (int)studentrepo.count();
-    year += count_student + 1;
-    String reg = "1" + String.valueOf(year);
-    student.setRegid(reg);
-    student.setYearAdmission(reg_year);
-
-    return studentrepo.save(student);
+  public List<StudentResponseDto> getallstudents(){
+    List<Student> student = studentrepo.findAll();
+    List<StudentResponseDto> list = new ArrayList<>();
+    for(Student stud : student){
+      list.add(studentmapper.toResponse(stud));
+    }
+    return list;
   }
 
 
-  public List<Student> getallstudents(){
-    return studentrepo.findAll();
-  }
-
-
-  public Student findStudent(String reg){
-    return studentrepo.findById(reg).orElseThrow(() -> new StudentnotFound("Student not found with regId: "+reg));
+  public StudentResponseDto findStudent(String reg){
+    Student stud = studentrepo.findById(reg).orElseThrow(() -> new StudentnotFound("Student not found with regId: "+reg));
+    StudentResponseDto student =studentmapper.toResponse(stud);
+    return student;
 }
 
 
-  public Student updateStudent(String reg, Student stuobj){
+  public StudentResponseDto updateStudent(String reg, Student stuobj){
     Student obj = studentrepo.findById(reg).orElseThrow(() -> new StudentnotFound("Student Not found with regId: "+reg));
     obj.setFirstName(stuobj.getFirstName());
     obj.setLastName(stuobj.getLastName());
@@ -76,8 +67,9 @@ public class StudentService{
     obj.setAddress(stuobj.getAddress());
     obj.setDob(stuobj.getDob());
     obj.setEmail(stuobj.getEmail());
-    studentrepo.save(obj);
-    return studentrepo.findById(reg).orElseThrow(()-> new StudentnotFound("Student not found with regId: "+reg));
+    Student stud = studentrepo.save(obj);
+    StudentResponseDto student = studentmapper.toResponse(stud);
+    return student;
   }
 
   public String UpdatePatch(String regId, Student updatedValue){
