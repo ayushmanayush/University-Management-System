@@ -4,13 +4,17 @@ import com.ums.backend.entity.*;
 import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ums.backend.config.AuthenticationFacade;
+import com.ums.backend.dto.PasswordUpdateDto;
 import com.ums.backend.dto.TeacherRequestDto;
 import com.ums.backend.dto.TeacherResponseDto;
-import com.ums.backend.mapper.TeacherCreationMapper;
 import com.ums.backend.repository.Departmentrepository;
 import com.ums.backend.repository.TeacherRepository;
+import com.ums.backend.repository.UserRepository;
+
 import java.util.*;
 import jakarta.transaction.Transactional;
 import com.ums.backend.exception.*;
@@ -20,6 +24,8 @@ import com.ums.backend.mapper.*;
 @Transactional
 public class TeacherService {
     @Autowired
+    AuthenticationFacade authenticationfacade;
+    @Autowired
     TeacherCreationMapper teachermapper;
     @Autowired
     TeacherRepository teacherrepo;
@@ -27,6 +33,10 @@ public class TeacherService {
     TeacherUpdate teacherupdated;
     @Autowired
     Departmentrepository departmentrepo;
+    @Autowired
+    UserRepository userrepo;
+    @Autowired
+    PasswordEncoder passwordEncoder;
     public synchronized String getteacherId(){
         int value = 10000;
         int count = (int)teacherrepo.count();
@@ -42,7 +52,18 @@ public class TeacherService {
         newTeacher.setDateJoined(LocalDate.now());
         newTeacher.setDepartment(dept);
         Teacher savedTeacher = teacherrepo.save(newTeacher);
+        User user = new User();
+        user.setUsername(savedTeacher.getTeacherId());
+        user.setPassword(passwordEncoder.encode("Teacher@123"));
+        user.setRole("ROLE_TEACHER");
+        userrepo.save(user);
         return teachermapper.toResponseDto(savedTeacher);
+    }
+    public void updatePassword(PasswordUpdateDto dto){
+        String teacherid = authenticationfacade.getCurrentUsername();
+        User user = userrepo.findByUsername(teacherid).orElseThrow(()-> new UserNotFound("User not found with User Id: "+teacherid));
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        userrepo.save(user);
     }
     public List<TeacherResponseDto> getALLTeachers(){
         List<TeacherResponseDto> listtoSend = teachermapper.toList(teacherrepo.findAll());

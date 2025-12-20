@@ -5,23 +5,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
 
-import com.ums.backend.dto.StudentRequestDto;
 import com.ums.backend.service.StudentService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.*;
-import org.springframework.web.bind.annotation.RequestBody;
+
 import com.ums.backend.dto.*;
 
 @RestController
 @RequestMapping("/admin/students")
 @Validated
 public class AdminStudentController {
-
     @Autowired
     private StudentService studentService;
     @PostMapping

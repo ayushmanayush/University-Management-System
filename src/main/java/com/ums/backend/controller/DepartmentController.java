@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@RequestMapping("/department")
+@RequestMapping("/admin/department")
 @Validated
 public class DepartmentController {
     @Autowired

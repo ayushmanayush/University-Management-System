@@ -1,6 +1,7 @@
 package com.ums.backend.service;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,7 +12,9 @@ import java.util.*;
 import com.ums.backend.exception.DepartmentNotFound;
 import com.ums.backend.exception.SectionNotFound;
 import com.ums.backend.exception.StudentnotFound;
+import com.ums.backend.exception.UserNotFound;
 import com.ums.backend.mapper.StudentCreationMapper;
+import com.ums.backend.config.AuthenticationFacade;
 import com.ums.backend.dto.*;
 
 @Service
@@ -28,7 +31,12 @@ public class StudentService{
   SectionRepository sectionrepo;
   @Autowired
   TeachingAssignmentRepository teachingAssignmentRepo;
-
+  @Autowired
+  UserRepository userrepo;
+  @Autowired
+  PasswordEncoder passwordencoder;
+  @Autowired
+  AuthenticationFacade authenticationfacade;
   public synchronized String generateRegId(){
       String reg_year = String.valueOf(LocalDate.now().getYear());
     int year = (Integer.parseInt(reg_year.substring(2)))*1000;
@@ -48,7 +56,18 @@ public class StudentService{
     newStudent.setDepartmentName(dept);
     Student savedStudent =  studentrepo.save(newStudent);
     StudentResponseDto resdto = studentmapper.toResponse(savedStudent);
+    User user = new User();
+    user.setUsername(savedStudent.getRegid());
+    user.setRole("ROLE_STUDENT");
+    user.setPassword(passwordencoder.encode("Student@123"));
+    userrepo.save(user);
     return resdto;
+  }
+  public void updateStudentPassword(PasswordUpdateDto dto){
+    String regId = authenticationfacade.getCurrentUsername();
+    User user = userrepo.findByUsername(regId).orElseThrow(()-> new UserNotFound("User Not found with Registration Id: "+regId));
+    user.setPassword(dto.getPassword());
+    userrepo.save(user);
   }
 
 
