@@ -21,16 +21,22 @@ public class StudentController {
 
     @Autowired
     private StudentService studentService;
+
     @GetMapping("/{regId}")
-    public ResponseEntity<StudentResponseDto> getProfile(@PathVariable @NotBlank(message = "Registration Id should not be blank") String regId) {
+    public ResponseEntity<StudentResponseDto> getProfile(
+            @PathVariable @NotBlank(message = "Registration Id should not be blank") String regId) {
         return ResponseEntity.ok(studentService.findStudent(regId));
     }
+
     @GetMapping("/{regId}/subjects")
-    public ResponseEntity<List<SubjectResponseDto>> getSubjects(@PathVariable @NotBlank(message = "Registration Id should not be blank") String regId) {
+    public ResponseEntity<List<SubjectResponseDto>> getSubjects(
+            @PathVariable @NotBlank(message = "Registration Id should not be blank") String regId) {
         return ResponseEntity.ok(studentService.getSubjectsForStudent(regId));
     }
+
     @GetMapping("/{regId}/teachers")
-    public ResponseEntity<List<TeacherResponseDto>> getTeachers(@PathVariable @NotBlank(message = "Registration id should not Be Blank") String regId) {
+    public ResponseEntity<List<TeacherResponseDto>> getTeachers(
+            @PathVariable @NotBlank(message = "Registration id should not Be Blank") String regId) {
         return ResponseEntity.ok(studentService.getTeachersForStudent(regId));
     }
 }

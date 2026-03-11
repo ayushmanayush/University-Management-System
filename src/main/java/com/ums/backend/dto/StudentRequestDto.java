@@ -1,20 +1,17 @@
 package com.ums.backend.dto;
 
 import java.time.LocalDate;
-
-// import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+
 // import lombok.Data;
 // @Data
 public class StudentRequestDto {
     @NotBlank(message = "First name should not be null")
     private String firstName;
     private String lastName;
-    @Pattern(regexp = "^[0-9]\\d{9}$",
-        message = "Please enter Valid Phone Number"
-    )
+    @Pattern(regexp = "^[0-9]\\d{9}$", message = "Please enter Valid Phone Number")
     private String phoneNumber;
-    @Email(message ="Please Enter a valid email")
+    @Email(message = "Please Enter a valid email")
     @NotBlank(message = "Email should not be blank")
     private String email;
     @NotBlank(message = "Address should not bhe null")
@@ -23,54 +20,60 @@ public class StudentRequestDto {
     private LocalDate dob;
     @NotBlank(message = "Department should not be null")
     private String department;
-    
 
-    public void setFirstName(String firstName){
+    public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-    public String getFirstName(){
+
+    public String getFirstName() {
         return firstName;
     }
 
-    public void setLastName(String lastName){
+    public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-    public String getLastName(){
+
+    public String getLastName() {
         return lastName;
     }
 
-    public void setAddress(String address){
+    public void setAddress(String address) {
         this.address = address;
     }
-    public String getAddress(){
+
+    public String getAddress() {
         return address;
     }
 
-    public void setPhoneNumber(String phoneNumber){
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
-    public String getPhoneNumber(){
+
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setEmail(String email){
+    public void setEmail(String email) {
         this.email = email;
     }
-    public String getEmail(){
+
+    public String getEmail() {
         return email;
     }
 
-    public void setDepartment(String department){
+    public void setDepartment(String department) {
         this.department = department;
     }
-    public String getDepartment(){
+
+    public String getDepartment() {
         return department;
     }
 
-    public void setDob(LocalDate dob){
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
-    public LocalDate getDob(){
+
+    public LocalDate getDob() {
         return dob;
     }
 

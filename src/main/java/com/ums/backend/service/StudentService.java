@@ -1,4 +1,5 @@
 package com.ums.backend.service;
+
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,12 +20,12 @@ import com.ums.backend.dto.*;
 
 @Service
 @Transactional
-public class StudentService{
+public class StudentService {
 
   @Autowired
   private Studentrepository studentrepo;
-  @Autowired 
-  private StudentCreationMapper studentmapper ;
+  @Autowired
+  private StudentCreationMapper studentmapper;
   @Autowired
   Departmentrepository departmentrepo;
   @Autowired
@@ -37,24 +38,27 @@ public class StudentService{
   PasswordEncoder passwordencoder;
   @Autowired
   AuthenticationFacade authenticationfacade;
-  public synchronized String generateRegId(){
-      String reg_year = String.valueOf(LocalDate.now().getYear());
-    int year = (Integer.parseInt(reg_year.substring(2)))*1000;
-    int count_student = (int)studentrepo.count();
+
+  public synchronized String generateRegId() {
+    String reg_year = String.valueOf(LocalDate.now().getYear());
+    int year = (Integer.parseInt(reg_year.substring(2))) * 1000;
+    int count_student = (int) studentrepo.count();
     year += count_student + 1;
     String reg = "1" + String.valueOf(year);
     return reg;
   }
-  public StudentResponseDto createStudentDto(StudentRequestDto stud){
+
+  public StudentResponseDto createStudentDto(StudentRequestDto stud) {
 
     Student newStudent = studentmapper.toEntity(stud);
     String reg = generateRegId();
     newStudent.setRegid(reg);
-    String reg_year =String.valueOf( LocalDate.now().getYear());
+    String reg_year = String.valueOf(LocalDate.now().getYear());
     newStudent.setYearAdmission(reg_year);
-    Department dept = departmentrepo.findById(stud.getDepartment()).orElseThrow(()-> new DepartmentNotFound("please Enter valid Department!"));
+    Department dept = departmentrepo.findById(stud.getDepartment())
+        .orElseThrow(() -> new DepartmentNotFound("please Enter valid Department!"));
     newStudent.setDepartmentName(dept);
-    Student savedStudent =  studentrepo.save(newStudent);
+    Student savedStudent = studentrepo.save(newStudent);
     StudentResponseDto resdto = studentmapper.toResponse(savedStudent);
     User user = new User();
     user.setUsername(savedStudent.getRegid());
@@ -63,37 +67,39 @@ public class StudentService{
     userrepo.save(user);
     return resdto;
   }
-  public void updateStudentPassword(PasswordUpdateDto dto){
+
+  public void updateStudentPassword(PasswordUpdateDto dto) {
     String regId = authenticationfacade.getCurrentUsername();
-    User user = userrepo.findByUsername(regId).orElseThrow(()-> new UserNotFound("User Not found with Registration Id: "+regId));
+    User user = userrepo.findByUsername(regId)
+        .orElseThrow(() -> new UserNotFound("User Not found with Registration Id: " + regId));
     user.setPassword(dto.getPassword());
     userrepo.save(user);
   }
 
-
-  public List<StudentResponseDto> getallstudents(){
+  public List<StudentResponseDto> getallstudents() {
     List<Student> student = studentrepo.findAll();
     List<StudentResponseDto> list = new ArrayList<>();
-    for(Student stud : student){
+    for (Student stud : student) {
       list.add(studentmapper.toResponse(stud));
     }
     return list;
   }
 
-
-  public StudentResponseDto findStudent(String reg){
-    Student stud = studentrepo.findById(reg).orElseThrow(() -> new StudentnotFound("Student not found with regId: "+reg));
-    StudentResponseDto student =studentmapper.toResponse(stud);
+  public StudentResponseDto findStudent(String reg) {
+    Student stud = studentrepo.findById(reg)
+        .orElseThrow(() -> new StudentnotFound("Student not found with regId: " + reg));
+    StudentResponseDto student = studentmapper.toResponse(stud);
     return student;
-}
+  }
 
-
-  public StudentResponseDto updateStudent(String reg, StudentRequestDto stuobj){
-    Student obj = studentrepo.findById(reg).orElseThrow(() -> new StudentnotFound("Student Not found with regId: "+reg));
+  public StudentResponseDto updateStudent(String reg, StudentRequestDto stuobj) {
+    Student obj = studentrepo.findById(reg)
+        .orElseThrow(() -> new StudentnotFound("Student Not found with regId: " + reg));
     obj.setFirstName(stuobj.getFirstName());
     obj.setLastName(stuobj.getLastName());
     obj.setPhoneNumber(stuobj.getPhoneNumber());
-    obj.setDepartmentName(departmentrepo.findById(stuobj.getDepartment()).orElseThrow(()-> new DepartmentNotFound("Please Enter valid Department !")));
+    obj.setDepartmentName(departmentrepo.findById(stuobj.getDepartment())
+        .orElseThrow(() -> new DepartmentNotFound("Please Enter valid Department !")));
     obj.setAddress(stuobj.getAddress());
     obj.setDob(stuobj.getDob());
     obj.setEmail(stuobj.getEmail());
@@ -102,61 +108,69 @@ public class StudentService{
     return student;
   }
 
-  public String UpdatePatch(String regId, StudentRequestDto updatedValue){
-    Student existingValue = studentrepo.findById(regId).orElseThrow(()-> new StudentnotFound("Student not Found with regId: "+ regId)); 
-    if(updatedValue.getFirstName() != null){
+  public String UpdatePatch(String regId, StudentRequestDto updatedValue) {
+    Student existingValue = studentrepo.findById(regId)
+        .orElseThrow(() -> new StudentnotFound("Student not Found with regId: " + regId));
+    if (updatedValue.getFirstName() != null) {
       existingValue.setFirstName(updatedValue.getFirstName());
     }
-    if(updatedValue.getLastName() != null){
+    if (updatedValue.getLastName() != null) {
       existingValue.setLastName(updatedValue.getLastName());
     }
-    if(updatedValue.getPhoneNumber() != null){
+    if (updatedValue.getPhoneNumber() != null) {
       existingValue.setPhoneNumber(updatedValue.getPhoneNumber());
     }
-    if(updatedValue.getEmail() != null){
+    if (updatedValue.getEmail() != null) {
       existingValue.setEmail(updatedValue.getEmail());
     }
-    if(updatedValue.getAddress() != null){
+    if (updatedValue.getAddress() != null) {
       existingValue.setAddress(updatedValue.getAddress());
     }
-    if(updatedValue.getDepartment() != null){
-      Department dept = departmentrepo.findById(updatedValue.getDepartment()).orElseThrow(()-> new DepartmentNotFound("Please Enter Valid department!"));
+    if (updatedValue.getDepartment() != null) {
+      Department dept = departmentrepo.findById(updatedValue.getDepartment())
+          .orElseThrow(() -> new DepartmentNotFound("Please Enter Valid department!"));
       existingValue.setDepartmentName(dept);
     }
-    if(updatedValue.getDob() != null){
+    if (updatedValue.getDob() != null) {
       existingValue.setDob(updatedValue.getDob());
     }
     studentrepo.save(existingValue);
-    return "Student details updated Successfully with regId "+regId;
+    return "Student details updated Successfully with regId " + regId;
   }
 
-  public void deleteStudent(String regId){
-      studentrepo.findById(regId).orElseThrow(()-> new StudentnotFound("Student not found with regId "+regId));
-      studentrepo.deleteById(regId); 
+  public void deleteStudent(String regId) {
+    studentrepo.findById(regId).orElseThrow(() -> new StudentnotFound("Student not found with regId " + regId));
+    studentrepo.deleteById(regId);
   }
-  public StudentResponseDto updateSection(String regid, AssignsectionrequestDto section){
-    Student student = studentrepo.findById(regid).orElseThrow(()-> new StudentnotFound("Student not found with regId: "+regid));
-    Section sect = sectionrepo.findById(section.getSectionName()).orElseThrow(()-> new SectionNotFound("Section is not Created Yet!"));
+
+  public StudentResponseDto updateSection(String regid, AssignsectionrequestDto section) {
+    Student student = studentrepo.findById(regid)
+        .orElseThrow(() -> new StudentnotFound("Student not found with regId: " + regid));
+    Section sect = sectionrepo.findById(section.getSectionName())
+        .orElseThrow(() -> new SectionNotFound("Section is not Created Yet!"));
     student.setSectionName(sect);
     student = studentrepo.save(student);
     return studentmapper.toResponse(student);
   }
-  public List<StudentResponseDto> getStudentBySection(String sect){
+
+  public List<StudentResponseDto> getStudentBySection(String sect) {
     List<Student> list = studentrepo.findBySectionNameSectionId(sect);
     List<StudentResponseDto> listToSend = new ArrayList<>();
-    for(Student i : list){
+    for (Student i : list) {
       listToSend.add(studentmapper.toResponse(i));
     }
     return listToSend;
   }
-  public List<StudentResponseDto> getstudentsByDepartment(String depId){
+
+  public List<StudentResponseDto> getstudentsByDepartment(String depId) {
     List<Student> list = studentrepo.findByDepartmentNameDepartmentId(depId);
     List<StudentResponseDto> listToSend = new ArrayList<>();
-    for(Student i: list){
+    for (Student i : list) {
       listToSend.add(studentmapper.toResponse(i));
     }
     return listToSend;
   }
+
   public List<SubjectResponseDto> getSubjectsForStudent(String regId) {
 
     Student student = studentrepo.findById(regId)
@@ -164,47 +178,46 @@ public class StudentService{
 
     String sectionId = student.getSectionName().getSectionId();
 
-    List<TeachingAssignment> assignments =
-        teachingAssignmentRepo.findBySection_sectionId(sectionId);
+    List<TeachingAssignment> assignments = teachingAssignmentRepo.findBySection_sectionId(sectionId);
 
     List<SubjectResponseDto> subjects = new ArrayList<>();
 
     for (TeachingAssignment ta : assignments) {
-        Subject s = ta.getSubject();
+      Subject s = ta.getSubject();
 
-        SubjectResponseDto dto = new SubjectResponseDto();
-        dto.setSubjectId(s.getSubjectId());
-        dto.setSubjectName(s.getSubjectName());
-        dto.setCredit(s.getCredit());
+      SubjectResponseDto dto = new SubjectResponseDto();
+      dto.setSubjectId(s.getSubjectId());
+      dto.setSubjectName(s.getSubjectName());
+      dto.setCredit(s.getCredit());
 
-        subjects.add(dto);
+      subjects.add(dto);
     }
 
     return subjects;
-}
-public List<TeacherResponseDto> getTeachersForStudent(String regId) {
+  }
+
+  public List<TeacherResponseDto> getTeachersForStudent(String regId) {
 
     Student student = studentrepo.findById(regId)
         .orElseThrow(() -> new StudentnotFound("Student not found"));
 
     String sectionId = student.getSectionName().getSectionId();
 
-    List<TeachingAssignment> assignments =
-        teachingAssignmentRepo.findBySection_sectionId(sectionId);
+    List<TeachingAssignment> assignments = teachingAssignmentRepo.findBySection_sectionId(sectionId);
 
     List<TeacherResponseDto> teachers = new ArrayList<>();
 
     for (TeachingAssignment ta : assignments) {
-        Teacher t = ta.getTeacher();
+      Teacher t = ta.getTeacher();
 
-        TeacherResponseDto dto = new TeacherResponseDto();
-        dto.setTeacherId(t.getTeacherId());
-        dto.setFirstName(t.getFirstName());
-        dto.setLastName(t.getLastName());
+      TeacherResponseDto dto = new TeacherResponseDto();
+      dto.setTeacherId(t.getTeacherId());
+      dto.setFirstName(t.getFirstName());
+      dto.setLastName(t.getLastName());
 
-        teachers.add(dto);
+      teachers.add(dto);
     }
 
     return teachers;
-}
+  }
 }
